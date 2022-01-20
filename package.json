@@ -1,0 +1,32 @@
+{
+  "name": "ng_oca_app_e2e",
+  "version": "1.0.0",
+  "description": "End to end tests for OncallAir App",
+  "main": "index.js",
+  "scripts": {
+    "run": "cypress run --env target=dev",
+    "open": "cypress open --env target=dev",
+    "start:local": "cypress open --env target=local",
+    "start": "npm run open",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/watscoengage/oncallair-app-e2e.git"
+  },
+  "keywords": [
+    "cypress",
+    "e2e"
+  ],
+  "author": "Auxcoder",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/watscoengage/oncallair-app-e2e#readme",
+  "devDependencies": {
+    "chance": "^1.1.4",
+    "cypress": "^8.6.0",
+    "cypress-xpath": "^1.6.2",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-cypress": "^2.10.3",
+    "eslint-plugin-prettier": "^4.0.0"
+  }
+}
