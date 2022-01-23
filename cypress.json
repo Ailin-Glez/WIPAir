@@ -1,4 +1,9 @@
 {
+    "baseUrl": "https://app.oncallair.com/",
     "defaultCommandTimeout": 6000,
-    "testFiles": "**/*.js"
+    "viewportWidth": 1600,
+    "viewportHeight": 900,
+    "chromeWebSecurity": false,
+    "testFiles": "**/*.js",
+    "experimentalSessionSupport": true
 }

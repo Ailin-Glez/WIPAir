@@ -2,7 +2,7 @@ const TARGET = Cypress.env("target");
 const ENV_VARS = Cypress.env().env;
 import CONFIG from "../../fixtures/proposalToAccept.json";
 
-context("Proposal -> Details -> Accept", () => {
+context.skip("Proposal -> Details -> Accept", () => {
   let link;
 
   function getLink() {

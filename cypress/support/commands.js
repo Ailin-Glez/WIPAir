@@ -1,84 +1,76 @@
-// ***********************************************
-// This example commands.js shows you how to
-// create various custom commands and overwrite
-// existing commands.
-// const helper = require("../helpers");
-import { filterCookies } from "../helpers";
-const OCATK_KEY = "OCATK";
-const TARGET = Cypress.env("target");
+/// <reference types="../support" />
+
+import { urls } from '../fixtures/urls';
+import { filterCookies } from '../helpers';
+import { mockProposalBody } from '../fixtures/mock-proposal-response';
+import { onLoginPage } from '../pages/LoginPage';
+import { onConsultationPage } from '../pages/ConsultationPage';
+import { onCustomerInfoPage } from '../pages/CustomerInfoPage';
+
+const OCATK_KEY = 'OCATK';
+// const TARGET = Cypress.env("target");
+const TARGET = 'dev';
 const ENV_VARS = Cypress.env().env;
 
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// -- This is a parent command --
-Cypress.Commands.add("login", (email, password) => {
-  cy.request({
-    method: "POST",
-    url: `${ENV_VARS[TARGET].urlApi}serviceprovideruser/login`,
-    form: true, // indicates the body should be form urlencoded and sets Content-Type: application/x-www-form-urlencoded headers
-    headers: {
-      Accept: "application/json,text/plain,*/*",
-      Auth: "WVudHMiXSwkdBR0UiLCJ1c2VyX2lkIjoXNlciJdfQLf88Iegu7LC8t2lcH9r_o70yUuRSVPZlYXR1cmVzzLCJ1",
-    },
-    body: {
-      email: ENV_VARS[TARGET].credentials.admin.email,
-      password: ENV_VARS[TARGET].credentials.admin.password,
-    },
-  }).then((response) => {
-    expect(response.body).to.have.property("session_token");
-    Cypress.Cookies.debug(true); // now Cypress will log out when it alters cookies
-    cy.clearCookie(OCATK_KEY);
-    cy.setCookie(OCATK_KEY, response.body.session_token);
-    // .should("have.length", 1)
-    cy.getCookies().then((cookies) => {
-      const OCA_TK = filterCookies(cookies, OCATK_KEY);
-      expect(OCA_TK.name).to.equal(OCATK_KEY);
-      expect(OCA_TK.value).to.equal(response.body.session_token);
+Cypress.Commands.add('loginUI', () => {
+  cy.session('automated', () => {
+      onLoginPage.login();
+      cy.wait(2000)
+      cy.getCookies().then(cookies => {
+        const namesOfCookies = cookies.map(c => c.name);
+        Cypress.Cookies.defaults({ preserve: [...namesOfCookies] });
     });
   });
 });
 
-Cypress.Commands.add(
-  "unAccept",
-  (serviceProviderId, consultationId, userId) => {
-    cy.getCookies().then((cookies) => {
-      const OCA_TK = filterCookies(cookies, OCATK_KEY);
-      cy.request({
-        method: "POST",
-        url: `${ENV_VARS[TARGET].urlApi}/consultation/unacceptconsultationfromapp`,
-        form: true,
-        headers: {
-          Accept: "application/json,text/plain,*/*",
-          Auth: OCA_TK.value,
-        },
-        body: {
-          consultationId,
-          userId,
-          serviceProviderId,
-        },
-      }).then((response) => {
-        expect(response.body).to.have.property("success");
-      });
+Cypress.Commands.add('mockProposalRequest', () => {
+    cy.getCookie(OCATK_KEY).then((cookie) => {
+        cy.intercept('GET', urls.consultationId, (rq) => {
+            const replyBody = mockProposalBody(cookie.value);
+            rq.reply(replyBody);
+        }).as('mockProposalRequest');
     });
-  }
-);
-
-Cypress.Commands.add("mockGeolocation", (latitude, longitude) => {
-  cy.window().then(($window) => {
-    cy.stub($window.navigator.geolocation, "getCurrentPosition", (callback) => {
-      return callback({ coords: { latitude, longitude } });
-    });
-  });
 });
 
-// -- This is a child command --
-// Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add("dismiss", { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This will overwrite an existing command --
-// Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+Cypress.Commands.add('goToProposalPage', () => {
+  cy.session('Navigate to Proposal Page', () => {
+    cy.loginUI();
+    cy.visit('/');
+    onConsultationPage.clickConsultationBtn();
+    onCustomerInfoPage.selectTestMode().clickNextButton().skipSurvey();
+  });
+})
+
+
+
+// Cypress.Commands.add('login', () => {
+//   cy.session('Test user', () => {
+//     cy.request({
+//         method: 'POST',
+//         url: 'https://api.oncallair.com/serviceprovideruser/login',
+//         form: true, // indicates the body should be form urlencoded and sets Content-Type: application/x-www-form-urlencoded headers
+//         headers: {
+//             Accept: 'application/json,text/plain,*/*',
+//             Auth: 'WVudHMiXSwkdBR0UiLCJ1c2VyX2lkIjoXNlciJdfQLf88Iegu7LC8t2lcH9r_o70yUuRSVPZlYXR1cmVzzLCJ1'
+//         },
+//         body: {
+//             email: ENV_VARS[TARGET].credentials.admin.email,
+//             password: ENV_VARS[TARGET].credentials.admin.password
+//         }
+//     }).then((rq) => {
+//       console.log(rq)
+//       cy.getCookies().then(cookies => {
+//         const namesOfCookies = cookies.map(c => c.name);
+//         console.log(namesOfCookies)
+//         Cypress.Cookies.defaults({ preserve: [...namesOfCookies] });
+//       });
+//     })
+//   }), { validate() {
+//       cy.getCookies().then(cookies => {
+//         const namesOfCookies = cookies.map(c => c.name);
+//         console.log(namesOfCookies)
+//         Cypress.Cookies.defaults({ preserve: [...namesOfCookies] });
+//       });
+//     }
+//   }
+// });

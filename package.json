@@ -22,11 +22,13 @@
   "license": "ISC",
   "homepage": "https://bitbucket.org/watscoengage/oncallair-app-e2e#readme",
   "devDependencies": {
+    "@faker-js/faker": "^6.0.0-alpha.3",
     "chance": "^1.1.4",
     "cypress": "^8.6.0",
     "cypress-xpath": "^1.6.2",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-cypress": "^2.10.3",
-    "eslint-plugin-prettier": "^4.0.0"
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "2.5.1"
   }
 }
