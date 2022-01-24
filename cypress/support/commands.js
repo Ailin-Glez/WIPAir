@@ -4,8 +4,6 @@ import { urls } from '../fixtures/urls';
 import { filterCookies } from '../helpers';
 import { mockProposalBody } from '../fixtures/mock-proposal-response';
 import { onLoginPage } from '../pages/LoginPage';
-import { onConsultationPage } from '../pages/ConsultationPage';
-import { onCustomerInfoPage } from '../pages/CustomerInfoPage';
 
 const OCATK_KEY = 'OCATK';
 // const TARGET = Cypress.env("target");
@@ -13,14 +11,14 @@ const TARGET = 'dev';
 const ENV_VARS = Cypress.env().env;
 
 Cypress.Commands.add('loginUI', () => {
-  cy.session('automated', () => {
-      onLoginPage.login();
-      cy.wait(2000)
-      cy.getCookies().then(cookies => {
-        const namesOfCookies = cookies.map(c => c.name);
-        Cypress.Cookies.defaults({ preserve: [...namesOfCookies] });
+    cy.session('automated', () => {
+        onLoginPage.login();
+        cy.wait(2000);
+        cy.getCookies().then((cookies) => {
+            const namesOfCookies = cookies.map((c) => c.name);
+            Cypress.Cookies.defaults({ preserve: [...namesOfCookies] });
+        });
     });
-  });
 });
 
 Cypress.Commands.add('mockProposalRequest', () => {
@@ -31,17 +29,6 @@ Cypress.Commands.add('mockProposalRequest', () => {
         }).as('mockProposalRequest');
     });
 });
-
-Cypress.Commands.add('goToProposalPage', () => {
-  cy.session('Navigate to Proposal Page', () => {
-    cy.loginUI();
-    cy.visit('/');
-    onConsultationPage.clickConsultationBtn();
-    onCustomerInfoPage.selectTestMode().clickNextButton().skipSurvey();
-  });
-})
-
-
 
 // Cypress.Commands.add('login', () => {
 //   cy.session('Test user', () => {

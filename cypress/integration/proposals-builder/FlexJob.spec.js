@@ -1,21 +1,24 @@
 import { urls } from '../../fixtures/urls';
 import { flexJobToSelect } from '../../fixtures/flex-jobs';
-import { proposalTypes } from '../../fixtures/constants';
+import { maxTimeout, proposalTypes } from '../../fixtures/constants';
 import { proposalStatus } from '../../pages/ProposalBuilderPage/ProposalsBasePage';
 import { onFlexJob } from '../../pages/ProposalBuilderPage/FlexJob';
+import { consultationTest } from '../../fixtures/mock-proposal-response';
 
 describe('Create Flex Job Tests', () => {
     const index = 0;
     
     beforeEach(() => {
-        cy.goToProposalPage();
+        cy.loginUI();
+        cy.window().then((win) => win.sessionStorage.setItem('ocaa.consultation', JSON.stringify(consultationTest)));
         cy.mockProposalRequest();
-        cy.visit(urls.proposal)
-        cy.wait('@mockProposalRequest');
-        onFlexJob
-            .selectProposalType(proposalTypes.flexJob)
-            .verifyProposalsContainers(proposalStatus.empty)
-            .selectFlexJobAndCategory(flexJobToSelect);
+        cy.visit(urls.proposal);
+        cy.wait('@mockProposalRequest', { timeout: maxTimeout }).then(() => {
+            onFlexJob
+                .selectProposalType(proposalTypes.flexJob)
+                .verifyProposalsContainers(proposalStatus.empty)
+                .selectFlexJobAndCategory(flexJobToSelect);
+        });
     });
 
     it('should include a Flex Job to all proposals', () => {

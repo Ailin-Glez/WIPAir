@@ -10,10 +10,5 @@ declare namespace Cypress {
          * @example cy.mockProposalRequest()
          */
         mockProposalRequest(): void
-        /**
-         * Custom command to bypass the Customer and the Survey pages and go directly to Proposal Page
-         * @example cy.goToProposalPage()
-         */
-        goToProposalPage(): void
     }
 }
