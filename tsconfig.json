@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+      "moduleResolution": "node",
+      "allowSyntheticDefaultImports": true,
+      "target": "es6",
+      "lib": ["es6", "dom"],
+      "types": ["node", "cypress"]
+    },
+    "include": ["**/*.ts", "cypress/plugins/index.ts"],
+}

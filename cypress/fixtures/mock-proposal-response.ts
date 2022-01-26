@@ -1,4 +1,4 @@
-export function mockProposalBody(token) {
+export function mockProposalBody(token: string) {
     return {
         success: {
             code: 100,
@@ -16,15 +16,14 @@ export function mockProposalBody(token) {
     };
 }
 
-export const consultationTest = {
-    customer_id: 459498,
-    customer_location_id: 458338,
-    consultation_id: 472846,
+export const consultationStagingTest = {
+    customer_id: 2305,
+    customer_location_id: 2243,
+    consultation_id: 4044,
     consultation_name: 'TEST',
-    consultation_code: 'ENGMYFTV0',
-    consultation_assigned_user_id: 7103,
+    consultation_code: 'ENG3WNNNA',
+    consultation_assigned_user_id: 100,
     consultation_client_state: 'proposal.equipment',
     consultation_current_client_state: 'proposal.equipment',
-    status: 'draft',
-    provider_id: 792
+    status: 'draft'
 };

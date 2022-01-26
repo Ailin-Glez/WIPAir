@@ -1,5 +1,7 @@
 import faker from '@faker-js/faker'
+import { ButtonStatus, maxTimeout } from '../../fixtures/constants';
 import { urls } from '../../fixtures/urls';
+import { Utils } from '../Utils';
 import { ProposalsBasePage } from './ProposalsBasePage';
 
 const locators = {
@@ -26,7 +28,7 @@ const cardMainBtns = {
     recomendAll: 'Recommend All'
 }
 
-function clickFlexJobMainBtn(button) {
+function clickFlexJobMainBtn(button: string): void {
     cy.get(locators.flexJobItem).first().then((flexJobItem) => {
         cy.wrap(flexJobItem).find('div.col-info > div.prod-info span.name').invoke('text').as('flexJobTitle');
         cy.wrap(flexJobItem).find('div.col-action button').contains(button).click();
@@ -54,8 +56,12 @@ class FlexJob extends ProposalsBasePage {
         return this;
     }
 
-    clickFlexJobCardArrowBtn() {
-        cy.get(locators.flexJobExpandBtn).first().click();
+    clickFlexJobExpandBtn() {
+        cy.get(locators.flexJobExpandBtn).find('img').invoke('attr', 'alt').then((arrowAttr) => {
+            if (arrowAttr === 'chevron-down') {
+                cy.get(locators.flexJobExpandBtn).first().click();
+            }
+        })
 
         return this;
     }
@@ -67,31 +73,35 @@ class FlexJob extends ProposalsBasePage {
     }
 
     includeFirstResultToAllProposals() {
+        cy.intercept('POST', urls.consultationSaved).as('consultationSaved');
         clickFlexJobMainBtn(cardMainBtns.includeAll);
 
         return this;
     }
 
-    selectFlexJobAndCategory(flexJobName) {
-        cy.contains(locators.flexJobSelector, flexJobName).click().as('flexJobSelected');
-        cy.get('@flexJobSelected')
-            .parent('div')
-            .siblings('div.sub-categories')
-            .should('have.class', 'in')
-            .as('subCategories');
-        cy.intercept('GET', urls.catalog).as('catalog');
-        cy.get('@subCategories').find(locators.flexJobSelector).then((items) => {
-            const index = Math.floor(Math.random() * items.length);
-            cy.wrap(items).eq(index).click();
+    selectFlexJobAndCategory() {
+        cy.wait('@flexJobCatalog', { timeout: maxTimeout }).its('response.body').then((catalog) => {
+            const flexJobName = Utils.getRandomValue(catalog.payLoad)['name'];
+            cy.contains(locators.flexJobSelector, flexJobName).click().as('flexJobSelected');
+            cy.get('@flexJobSelected')
+                .parent('div')
+                .siblings('div.sub-categories')
+                .should('have.class', 'in')
+                .as('subCategories');
+            cy.intercept('GET', urls.catalog).as('catalog');
+            cy.get('@subCategories').find(locators.flexJobSelector).then((items) => {
+                const index = Math.floor(Math.random() * items.length);
+                cy.wrap(items).eq(index).click();
+            });
+            cy.wait('@catalog');
+            cy.get(locators.showCategoriesBtn).should('be.visible');
         });
-        cy.wait('@catalog');
-        cy.get(locators.showCategoriesBtn).should('be.visible');
 
         return this;
     }
 
-    searchFlexJob(name) {
-        cy.intercept('GET', urls.jobsCatalog).as('jobSearch');
+    searchFlexJob(name: string) {
+        cy.intercept('GET', urls.flexJobsCatalog).as('jobSearch');
         cy.get(locators.flexJobSearchBox).type(name);
         cy.wait('@jobSearch');
 
@@ -110,20 +120,22 @@ class FlexJob extends ProposalsBasePage {
                 .should('not.equal', adjustedPrice);
         });
 
-        this.clickFlexJobCardArrowBtn();
+        this.clickFlexJobExpandBtn();
         clickFlexJobMainBtn(cardMainBtns.includeAll);
         cy.wait('@consultationSaved');
         return this;
     }
 
-    verifyRecommendBtns(statusBtn, index) {
+    verifyRecommendBtns(statusBtn: ButtonStatus, index?: number) {
         cy.get(locators.recommendBtn).then((btns) => {
             if (index !== undefined) {
                 cy.wrap(btns).eq(index).should(`be.${statusBtn}`);
             } else {
-                cy.wrap(btns).each((btn) =>
-                    cy.wrap(btn).should(`be.${statusBtn}`)
-                );
+                cy.wrap(btns).each((btn, index) => {
+                    if (index < 4) {
+                        cy.wrap(btn).should(`be.${statusBtn}`);
+                    }
+                });
             }
         });
 

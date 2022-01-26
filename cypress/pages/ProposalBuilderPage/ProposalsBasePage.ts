@@ -1,10 +1,11 @@
+import { ProposalNames, ProposalTypes } from '../../fixtures/constants';
 import { urls } from '../../fixtures/urls';
 
 const messageForEmptyProposal = 'Drop System to Proposal';
 const messageIncludedProposal = '1 incl';
 
 const locators = {
-    toastMessage: '#toast-container div.toast-message',
+    toastMessage: 'div.toast-message',
     deleteItemBtn: 'div.remove-item',
     proposals: {
         cards: '#proposalsDropZone div.proposal',
@@ -23,14 +24,11 @@ function checkProposalsPrice(expectedPrice, index = 0) {
     cy.get(locators.proposals.cards).eq(index).click();
 }
 
-export const proposalStatus = {
-    empty: 'empty',
-    value: 'value'
-};
+export enum ProposalStatus { empty = 0, value };
 
 export class ProposalsBasePage {
 
-    checkFlexJobTitleOnProposals(index) {
+    checkFlexJobTitleOnProposals(index?: number) {
         cy.get('@flexJobTitle').then((flexJobTitle) => {
             const expectedJobTitle = ` ${flexJobTitle} `;
 
@@ -44,7 +42,7 @@ export class ProposalsBasePage {
         });
     }
 
-    selectProposalType(typeName) {
+    selectProposalType(typeName: ProposalTypes) {
         cy.contains(typeName).click({force: true});
 
         return this;
@@ -61,13 +59,13 @@ export class ProposalsBasePage {
         return this;
     }
 
-    verifyProposalsContainers(status, index) {
-        const locator = status === 'empty' ? locators.proposals.cardsHeader : locators.proposals.includesLabel;
-        const expectedMessage = status === 'empty' ? messageForEmptyProposal : messageIncludedProposal;
+    verifyProposalsContainers(status: ProposalStatus, proposalName?: ProposalNames) {
+        const locator = status === ProposalStatus.empty ? locators.proposals.cardsHeader : locators.proposals.includesLabel;
+        const expectedMessage = status === ProposalStatus.empty ? messageForEmptyProposal : messageIncludedProposal;
 
         cy.get(locator).then((proposals) => {
-            if (index !== undefined) {
-                cy.wrap(proposals).eq(index).should('contain', expectedMessage);
+            if (proposalName !== undefined) {
+                cy.wrap(proposals).eq(proposalName).should('contain', expectedMessage);
             } else {
                 cy.wrap(proposals).each((proposal) => expect(proposal).contain(expectedMessage));
             }
@@ -76,12 +74,12 @@ export class ProposalsBasePage {
         return this;
     }
 
-    verifyProposalsPrice(index = 4) {
+    verifyProposalsPrice(proposal = 4) {
         cy.get('@adjustedPrice').then((expectedPrice) => {
-            if (index === undefined) {
+            if (proposal === undefined) {
                 checkProposalsPrice(expectedPrice);
             } else {
-                for (let i = 0; i < index; i++) {
+                for (let i = 0; i < proposal; i++) {
                  checkProposalsPrice(expectedPrice, i);   
                 }
             }
@@ -90,7 +88,7 @@ export class ProposalsBasePage {
         return this;
     }
 
-    verifyIncludedMessage(proposalName) {
+    verifyIncludedMessage(proposalName: string) {
         cy.get(locators.toastMessage).should('have.text', `Included in ${proposalName}`);
 
         return this;
