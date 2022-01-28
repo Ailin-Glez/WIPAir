@@ -3,16 +3,34 @@ import { urls } from '../../../fixtures/urls';
 import { ButtonStatus, maxTimeout, ProposalNames, ProposalTypes } from '../../../fixtures/constants';
 import { ProposalStatus } from '../../../pages/ProposalBuilderPage/ProposalsBasePage';
 import { onFlexJob } from '../../../pages/ProposalBuilderPage/FlexJob';
-import { consultationStagingTest } from '../../../fixtures/mock-proposal-response';
+import { baseBody } from '../../../support/commands';
 
 const index = 0;
+let data;
+
+before(() => {
+    cy.loginUI();
+    cy.createConsultation();
+    cy.get('@consultationData').then((consultationData) => {
+        data = consultationData;
+    });
+});
+
+after(() => {
+    const consultationData = {
+        ...baseBody,
+        consultationId: data.consultation_id
+    };
+
+    cy.archiveConsultation(consultationData);
+});
 
 Given('I am on the Proposals screen', () => {
     cy.intercept('GET', urls.flexJobsCatalog).as('flexJobCatalog');
     cy.loginUI();
-    cy.window().then((win) => win.sessionStorage.setItem('ocaa.consultation', JSON.stringify(consultationStagingTest)));
-    cy.mockProposalRequest();
+    cy.window().then((win) => win.sessionStorage.setItem('ocaa.consultation', JSON.stringify(data)));
     cy.visit(urls.proposal);
+    cy.mockProposalRequest();
 });
 
 Given('all the Recommend buttons are {word} since the Proposals haven\'t a Flex Job added', (bntStatus: string) => {

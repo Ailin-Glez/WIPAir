@@ -42,6 +42,12 @@ export class ProposalsBasePage {
         });
     }
 
+    clickModalButton(action: string) {
+        cy.contains('div.modal-footer button', action).click();
+        
+        return this;
+    }
+
     selectProposalType(typeName: ProposalTypes) {
         cy.contains(typeName).click({force: true});
 
@@ -90,6 +96,12 @@ export class ProposalsBasePage {
 
     verifyIncludedMessage(proposalName: string) {
         cy.get(locators.toastMessage).should('have.text', `Included in ${proposalName}`);
+
+        return this;
+    }
+
+    verifyModalText(expectedMessage: string) {
+        cy.get(locators.modalMessage).should('have.text', expectedMessage);
 
         return this;
     }
